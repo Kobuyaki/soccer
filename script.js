@@ -197,7 +197,11 @@ function drawField() {
 // 操作イベント
 // 操作イベント
 // mousedown はキャンバス内のみで発火させるので canvas のまま
-canvas.addEventListener('mousedown', (e) => {
+// スマホでのドラッグ中に画面がスクロールしてしまうのを防ぐ
+canvas.style.touchAction = 'none';
+
+// 操作イベント（pointer イベントを使うことで、マウスとスマホのタッチ両方に対応できます）
+canvas.addEventListener('pointerdown', (e) => {
     if (isMoving) return;
 
     const rect = canvas.getBoundingClientRect();
@@ -215,21 +219,20 @@ canvas.addEventListener('mousedown', (e) => {
     });
 });
 
-// mousemove と mouseup を window に対して設定する（キャンバス外でも追従・離せるようにする）
-window.addEventListener('mousemove', (e) => {
+// キャンバス外でも指の動きを追従できるように window に対して設定
+window.addEventListener('pointermove', (e) => {
     if (!selectedPiece) return;
     const rect = canvas.getBoundingClientRect();
-    // 画面外の座標も計算して保持する
     dragStart = { x: e.clientX - rect.left, y: e.clientY - rect.top };
 });
 
-window.addEventListener('mouseup', () => {
+window.addEventListener('pointerup', () => {
     if (selectedPiece && dragStart) {
         const dx = selectedPiece.x - dragStart.x;
         const dy = selectedPiece.y - dragStart.y;
         const distance = Math.hypot(dx, dy); // 引っ張った距離
 
-        // ★距離が MIN_DRAG_DISTANCE 以上の時だけショット発動
+        // 距離が MIN_DRAG_DISTANCE 以上の時だけショット発動
         if (distance >= MIN_DRAG_DISTANCE) {
             selectedPiece.vx = dx * 0.15;
             selectedPiece.vy = dy * 0.15;
@@ -240,6 +243,12 @@ window.addEventListener('mouseup', () => {
         selectedPiece = null;
         dragStart = null;
     }
+});
+
+// 画面外に指が出たまま離された・キャンセルされた場合の保険
+window.addEventListener('pointercancel', () => {
+    selectedPiece = null;
+    dragStart = null;
 });
 
 function gameLoop() {
