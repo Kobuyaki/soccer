@@ -34,3 +34,10 @@ canvas {
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
     cursor: pointer;
 }
+
+/* 選択を禁止するクラスの例 */
+body {
+  -webkit-user-select: none; /* Safari用 */
+  -moz-user-select: none;    /* Firefox用 */
+  user-select: none;         /* 標準 */
+}
